@@ -1,0 +1,16 @@
+# tye application configuration file
+# read all about it at https://github.com/dotnet/tye
+#
+# when you've given us a try, we'd love to know what you think:
+#    https://aka.ms/AA7q20u
+#
+
+services:
+  - name: web
+    workingDirectory: Web
+    executable: dapr
+    args: run --app-id web --app-port 5285 --dapr-http-port 3500 dotnet run
+  - name: cars-service
+    workingDirectory: Cars\Cars.Api
+    executable: dapr
+    args: run --app-id cars-service --app-port 5022 --dapr-http-port 3501 dotnet run

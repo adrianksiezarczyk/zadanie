@@ -1,0 +1,27 @@
+{
+  "iisSettings": {
+    "windowsAuthentication": false,
+    "anonymousAuthentication": true,
+    "iisExpress": {
+      "applicationUrl": "http://localhost:31683",
+      "sslPort": 0
+    }
+  },
+  "profiles": {
+    "Web": {
+      "commandName": "Project",
+      "launchBrowser": true,
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development"
+      },
+      "applicationUrl": "https://localhost:7274;http://localhost:5285",
+      "dotnetRunMessages": true
+    },
+    "Dapr": {
+      "commandName": "Executable",
+      "executablePath": "dapr",
+      "commandLineArgs": "run --app-id web --app-port 5285 --dapr-http-port 3500 dotnet run",
+      "workingDirectory": "$(ProjectDir)"
+    }
+  }
+}

@@ -1,0 +1,128 @@
+﻿@page "/"
+
+<PageTitle>Weather forecast</PageTitle>
+
+@using Cars.Application.Cars.Commands
+@using Cars.Application.Cars.Queries
+@using Web.Services
+@inject ICarService CarsService
+@inject IJSRuntime JsRuntime
+
+
+<h1>Car View</h1>
+
+<p>Car view</p>
+
+@if (getCarsResponse == null || getFilterOptionsResponse == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Category</th>
+                <th>Production year</th>
+                <th>Brand</th>
+                <th>Model</th>
+            </tr>
+            <tr>
+                <th>
+                    <select class="form-control" @onchange='@(e=> GetData(nameof(GetCars.Query.Category), e.Value))' >
+                        <option value="">Select...</option>
+                        @foreach (var value in getFilterOptionsResponse.Categories)
+                        {
+                            <option value=@value>@value</option>
+                        }                        
+                    </select>
+                </th>
+                <th>
+                    <select class="form-control" @onchange='@(e=> GetData(nameof(GetCars.Query.ProductionYear), e.Value))'>
+                        <option value="0">Select...</option>
+                        @foreach (var value in getFilterOptionsResponse.ProductionYears)
+                        {
+                            <option value=@value>@value</option>
+                        }
+                    </select>
+                </th>
+                <th>
+                    <select class="form-control" @onchange='@(e=> GetData(nameof(GetCars.Query.Brand), e.Value))'>
+                        <option value="">Select...</option>
+                        @foreach (var value in getFilterOptionsResponse.Brands)
+                        {
+                            <option value=@value>@value</option>
+                        }
+                    </select>
+                </th>
+                <th>
+                    <select class="form-control" @onchange='@(e=> GetData(nameof(GetCars.Query.Model), e.Value))'>
+                        <option value="">Select...</option>
+                        @foreach (var value in getFilterOptionsResponse.Models)
+                        {
+                            <option value=@value>@value</option>
+                        }
+                    </select>
+                </th>
+                <th>Action</th>
+            </tr>
+        </thead>
+
+        <tbody>
+            @foreach (var car in getCarsResponse.Data)
+            {
+                <tr>
+                    <td>@car.Category</td>
+                    <td>@car.ProductionYear</td>
+                    <td>@car.Brand</td>
+                    <td>@car.Model</td>
+                    <td>
+                        <button class="form-control" @onclick="() => ReserveCar(car.Id)">Reserve</button>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+    private GetCars.Response? getCarsResponse;
+    private GetCarFilterOptions.Response? getFilterOptionsResponse;
+
+    private GetCars.Query? request = new GetCars.Query();
+
+    protected override async Task OnInitializedAsync()
+    {
+        getFilterOptionsResponse = await this.CarsService.GetFilterOptions();
+        await Refresh();
+    }
+    private async Task Refresh()
+    {
+        request.PageSize = 100; //just demo
+        getCarsResponse = await this.CarsService.GetCars(request);
+    }
+    private async Task ReserveCar(long carId)
+    {
+        await this.CarsService.ReserveCar(new ReserveCar.Command(carId));
+        await JsRuntime.InvokeVoidAsync("alert", "Reservation saved");
+
+    }
+
+
+    async Task GetData(string field, object value)
+    {
+        switch(field)
+        {
+            case nameof(GetCars.Query.Category):
+                request.Category = (string) value; break;
+            case nameof(GetCars.Query.ProductionYear):
+                var year = Convert.ToInt32(value);
+                request.ProductionYear = year == 0 ? null : year; break;
+            case nameof(GetCars.Query.Brand):
+                request.Brand = (string) value; break;
+            case nameof(GetCars.Query.Model):
+                request.Model = (string) value; break;
+        }
+        await Refresh();
+    }
+}
