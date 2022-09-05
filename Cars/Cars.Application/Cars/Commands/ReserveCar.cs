@@ -32,12 +32,7 @@ public static class ReserveCar
         public QueryValidator(IApplicationDbContext dataContext)
         {
             RuleFor(c => c.CarId)
-                .Must(carId =>
-                {
-                    return dataContext.Cars
-                        .Where(c => c.Id == carId)
-                        .Any();
-                })
+                .Must(carId => dataContext.Cars.Any(c => c.Id == carId))
                 .WithMessage("Car not found");
         }
     }
